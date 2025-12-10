@@ -1,83 +1,147 @@
 # Fiindo Recruitment Challenge
 
-This repository contains a coding challenge for fiindo candidates. Candidates should fork this repository and implement their solution based on the requirements below.
+This is my solution for the Fiindo backend challenge.
 
-## Challenge Overview
+The task was to build a small Python application that connects to the Fiindo API, processes stock and financial data, performs some calculations, and stores the results in a SQLite database.
 
-Create a data processing application that:
-- Fetches financial data from an API
-- Performs calculations on stock ticker data
-- Saves results to a SQLite database
+---
 
-## Technical Requirements
+## What the app does
 
-### Input
-- **API Endpoint**: `https://api.test.fiindo.com` (docs: `https://api.test.fiindo.com/api/v1/docs/`)
-- **Authentication**: Use header `Auhtorization: Bearer {first_name}.{last_name}` with every request. Anything else WILL BE IGNORED. No other format or value will be accepted.
-- **Template**: This forked repository as starting point
+- Fetches financial data from the Fiindo API  
+- Filters companies by industry  
+- Calculates:
+  - PE ratio (price to earnings)
+  - Revenue growth (quarter over quarter)
+  - Net income (trailing twelve months)
+  - Debt ratio (debt to equity)
+- Groups everything by industry and calculates averages/sums  
+- Saves everything into a local SQLite database (`fiindo_challenge.db`)
 
-### Output
-- **Database**: SQLite database with processed financial data
-- **Tables**: Individual ticker statistics and industry aggregations
+---
 
-## Process Steps
+## Technologies used
 
-### 1. Data Collection
-- Connect to the Fiindo API
-- Authenticate using your identifier `Auhtorization: Bearer {first_name}.{last_name}`
-- Fetch financial data
+- Python 3.11  
+- SQLAlchemy (ORM for SQLite)  
+- Requests (HTTP client for API)  
+- Alembic (optional, for migrations)  
+- Docker (for containerization)
 
-### 2. Data Calculations
+---
 
-Calculate data for symbols only from those 3 industries:
-  - `Banks - Diversified`
-  - `Software - Application`
-  - `Consumer Electronics`
+## API info
 
-#### Per Ticker Statistics
-- **PE Ratio**: Price-to-Earnings ratio calculation from last quarter
-- **Revenue Growth**: Quarter-over-quarter revenue growth (Q-1 vs Q-2)
-- **NetIncomeTTM**: Trailing twelve months net income
-- **DebtRatio**: Debt-to-equity ratio from last year
+- Base URL: `https://api.test.fiindo.com`
+- Docs: [https://api.test.fiindo.com/api/v1/docs/](https://api.test.fiindo.com/api/v1/docs/)
+- Authentication:  
+  ```
+  Authorization: Bearer barzan.sindi
+  ```
+- Only these industries are processed:
+  - Banks - Diversified  
+  - Software - Application  
+  - Consumer Electronics
 
-#### Industry Aggregation
-- **Average PE Ratio**: Mean PE ratio across all tickers in each industry
-- **Average Revenue Growth**: Mean revenue growth across all tickers in each industry
-- **Sum of Revenue**: Sum revenue across all tickers in each industry
+---
 
-### 3. Data Storage
-- Design appropriate database schema
-- Save individual ticker statistics
-- Save aggregated industry data
+## Database structure
 
-## Database Setup
+**ticker_statistics**
+| Column | Type | Description |
+|--------|------|-------------|
+| symbol | String | Stock symbol |
+| industry | String | Industry name |
+| pe_ratio | Float | Price to earnings |
+| revenue_growth | Float | QoQ revenue growth |
+| net_income_ttm | Float | TTM net income |
+| debt_ratio | Float | Debt to equity |
 
-### Database Files
-- `fiindo_challenge.db`: SQLite database file
-- `models.py`: SQLAlchemy model definitions (can be divided into separate files if needed)
-- `alembic/`: Database migration management
+**industry_aggregations**
+| Column | Type | Description |
+|--------|------|-------------|
+| industry | String | Industry name |
+| avg_pe_ratio | Float | Average PE ratio |
+| avg_revenue_growth | Float | Average revenue growth |
+| total_revenue | Float | Total revenue per industry |
 
-## Getting Started
+---
 
-1. **Fork this repository** to your GitHub account
-3. **Implement the solution** following the process steps outlined above 
+## Project structure
 
-## Deliverables
+```
+fiindo-recruitment-challange/
+│
+├── src/
+│   ├── api_client.py
+│   ├── processing.py
+│   ├── db.py
+│   ├── models.py
+│   ├── main.py
+│   └── fiindo_challenge.db
+│
+├── alembic/
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── README.md
+```
 
-Your completed solution should include:
-- Working application that fetches data from the API
-- SQLite database with calculated results
-- Clean, documented code
-- README with setup and run instructions
+---
 
-## Bonus Points
+## How to run it
 
-### Dockerization
-- Containerize your solution using Docker
-- Create a `Dockerfile` and `docker-compose.yml`
+### Local setup
 
-### Unit Testing
-- Write comprehensive unit tests for ETL part your solution
+Clone the repo:
+```bash
+git clone https://github.com/bsindi/fiindo-recruitment-challange.git
+cd fiindo-recruitment-challange
+```
 
+Create a virtual environment:
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
 
-Good luck with your implementation!
+Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+Run the script:
+```bash
+python src/main.py
+```
+
+The database file `fiindo_challenge.db` will be created automatically.
+
+---
+
+### Run with Docker (optional)
+
+Build the image:
+```bash
+docker-compose build
+```
+
+Run the container:
+```bash
+docker-compose up
+```
+
+It will automatically execute the app and create the SQLite database inside the container.
+
+---
+
+## Optional / Bonus
+
+- Docker setup included  
+- Basic structure ready for unit testing  
+- Alembic migrations can be added later if needed  
+
+---
+
+**Author:** Barzan Sindi  
+GitHub: [bsindi](https://github.com/bsindi)
